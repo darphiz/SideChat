@@ -3,23 +3,23 @@ import { ChatIcon, HistoryIcon, SettingsIcon, HamburgerIcon } from "./Icons";
 export const SideNav = () => {
   return (
     <ul className="font-medium">
-      <li className="border-y p-4 py-5 border-gray-300">
+      <li className="border-y p-4 border-gray-300">
         <a href="#" className="">
           <HamburgerIcon />
         </a>
       </li>
-      <li className="p-4 border-l-2 py-5 bg-white border-[#14746F]">
+      <li className="p-4 border-r-2 bg-white border-[#202123;]">
         <a href="#" className="">
           <ChatIcon />
         </a>
       </li>
-      <li className="border-y p-4 py-5 border-gray-300">
+      <li className="border-y p-4 border-gray-300">
         <a href="#" className="">
           <HistoryIcon />
         </a>
       </li>
 
-      <li className="border-y p-4 py-5 border-gray-300">
+      <li className="border-y p-4 border-gray-300">
         <a href="#" className="">
           <SettingsIcon />
         </a>
