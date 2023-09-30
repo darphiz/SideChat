@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Side Chat",
+  "description": "Your number one AI assistant",
+  "version": "1.0",
+  "action": {
+    "default_title": "Launch Side Chat AI"
+  },
+  "icons": {
+    "128": "img/icons_128.png",
+    "48": "img/icons_48.png",
+    "16": "img/icons_16.png"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "permissions": ["sidePanel", "contextMenus"]
+}
