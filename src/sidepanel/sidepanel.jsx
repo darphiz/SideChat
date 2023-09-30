@@ -35,7 +35,7 @@ export const Sidepanel = () => {
     }, [page]);
 
     return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen">
       <div className="flex flex-col bg-white w-full">
         <NavHeader />
         <div className="flex-grow">
