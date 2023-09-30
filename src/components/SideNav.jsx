@@ -1,28 +1,37 @@
 import React from "react";
 import { ChatIcon, HistoryIcon, SettingsIcon, HamburgerIcon } from "./Icons";
+import { usePage } from "../sidepanel/store";
+
 export const SideNav = () => {
-  return (
+    const setCurrentPage = usePage((state) => state.setCurrentPage)
+    const currentPage = usePage((state) => state.currentPage)
+    const activePageClass = (page) => {
+        return page === currentPage  ? 'p-4 border-r-2 cursor-pointer bg-white border-[#202123;]' 
+        : 'border-y p-4 cursor-pointer border-gray-300'
+    }
+
+    return (
     <ul className="font-medium">
-      <li className="border-y p-4 border-gray-300">
-        <a href="#" className="">
+      <li 
+        onClick={() => setCurrentPage('ham')}
+        className={activePageClass('ham') }>
           <HamburgerIcon />
-        </a>
       </li>
-      <li className="p-4 border-r-2 bg-white border-[#202123;]">
-        <a href="#" className="">
-          <ChatIcon />
-        </a>
+      <li 
+            onClick={() => setCurrentPage('chat')}
+            className={activePageClass('chat')}>
+            <ChatIcon />
       </li>
-      <li className="border-y p-4 border-gray-300">
-        <a href="#" className="">
-          <HistoryIcon />
-        </a>
+      <li 
+            onClick={() => setCurrentPage('history')}
+            className={activePageClass('history')}>
+            <HistoryIcon />
       </li>
 
-      <li className="border-y p-4 border-gray-300">
-        <a href="#" className="">
+      <li 
+        onClick={() => setCurrentPage('settings')}
+        className={activePageClass('settings')}>
           <SettingsIcon />
-        </a>
       </li>
     </ul>
   );
