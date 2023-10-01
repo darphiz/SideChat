@@ -1,9 +1,9 @@
 import React from 'react'
 import { ArrowRightIcon } from './Icons'
 import {ClipboardIcon} from '@heroicons/react/24/outline'
-import {PaperAirplaneIcon} from '@heroicons/react/24/solid'
 import { useGpt, useCoin, useChat, useCurrentChat } from '../sidepanel/store'
 import { endpoint } from '../utils'
+import toast, { Toaster } from 'react-hot-toast';
 
 export const ChatPage = () => {
     const gpt_version = useGpt((state) => state.gpt)
@@ -50,10 +50,10 @@ export const ChatPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setChats])
 
-    const promptGpt = async () => {
+    const promptGpt = async (custom_prompt=null) => {
         const newChat = {
             "chat_type": "user",
-            "message": prompt,
+            "message": custom_prompt ?? prompt,
             "gpt_version": gpt_version
         }
         
@@ -94,25 +94,44 @@ export const ChatPage = () => {
             setChatId(data.chat_id)
             setPrompt('')
             setMakingRequest(false)
-        }catch{
-            console.log('error')
+        }catch(e){
+            console.log(e)
+            toast.error("Something went wrong, please try again")
             setMakingRequest(false)
         }
 
     }
 
+
+    const promptDefault = async() => {
+        const default_prompt = 'Tell me something about the Big Bang so that I can explain it to my 5-year-old child'
+        await promptGpt(default_prompt)
+    }
+    
     return (
-    <div className='h-full flex flex-col space-y-3'>
-        <div className="p-2">
-            <div className='flex border space-x-3 items-center rounded-xl p-3'>
+    <div className='flex flex-col h-full space-y-3'>
+        
+        {
+            chats?.length <= 1 &&
+            <div className="p-2">
+            <div className='flex items-center p-3 space-x-3 border rounded-xl'>
                 <div>
+                    <Toaster />
                     <p className='font-bold'>🤓 Explain a complex sentence</p>
                     <p className='opacity-30 text-[.8rem]'>Tell me something about the Big Bang so that I can explain it to my 5-year-old child</p>
                 </div>
-                <ArrowRightIcon className="cursor-pointer w-8 h-8"/>
+                <button
+                    onClick={promptDefault}
+                >
+                    <ArrowRightIcon 
+                        className="w-8 h-8 cursor-pointer"
+                    />    
+                </button>
+                
             </div>
-        </div>
-        <div className='bg-white h-full'>
+        </div>}
+        
+        <div className='h-full bg-white'>
             {
                 chats?.map((chat, index) => {
                     if (chat.chat_type === 'user') {
@@ -124,14 +143,14 @@ export const ChatPage = () => {
             }
         </div>
         <div className="p-3">
-            <div className="my-3 flex items-center justify-between">
-                <button className="flex items-center space-x-3 border rounded-full p-2">
-                    <img src="/img/coin.png" alt="coin image" className='h-6 w-6' />
-                    <span>{coin}</span>
+            <div className="flex items-center justify-between my-3">
+                <button className="flex items-center p-2 space-x-3 border rounded-full">
+                    <img src="/img/coin.png" alt="coin image" className='w-4 h-4' />
+                    <span className="text-sm">{coin}</span>
                 </button>
                 
-                <span className="flex items-center space-x-3 border rounded-full p-2 cursor-pointer">
-                    <img src="/img/gpt-outline.png" alt="gpt image" className='h-6 w-6' />
+                <span className="flex items-center p-2 space-x-3 text-sm border rounded-full cursor-pointer">
+                    <img src="/img/gpt-outline.png" alt="gpt image" className='w-5 h-5' />
                     <select 
                         onChange={(e) => setGpt(e.target.value)}
                         defaultValue={gpt_version}
@@ -145,32 +164,34 @@ export const ChatPage = () => {
             {
                 makingRequest ? (
                     <div className='my-8'>
-                        <div className=" flex justify-center items-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                        <div className="flex items-center justify-center ">
+                            <div className="w-8 h-8 border-b-2 border-gray-900 rounded-full animate-spin"></div>
                         </div>
                     </div>
                 ) :
-                <div className="border space-x-3 p-2 rounded-xl flex items-end">
+                <div className="flex items-end p-2 space-x-3 border rounded-xl">
                 
                 <textarea 
                     name="ask" 
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="w-full p-2 resize-none outline-none"
+                    className="w-full p-2 outline-none resize-none"
                     id="ask"  
                     rows="4" 
                     placeholder="Type prompt here..."
                 />
                 {
                     prompt ?(
-                        <PaperAirplaneIcon 
-                            onClick={promptGpt}
-                            className="w-8 h-8 cursor-pointer"
+                        <img 
+                            src="/img/arrow-forward.png" 
+                            onClick={() => promptGpt()}
+                            className="w-5 h-5 cursor-pointer"
                         />
                     ):
                     (
-                        <PaperAirplaneIcon 
-                            className="w-8 h-8 cursor-pointer opacity-20"
+                        <img
+                            src="/img/arrow-forward.png" 
+                            className="w-5 h-5 opacity-20"
                         />
                     )
                 }
@@ -188,7 +209,7 @@ export const ChatPage = () => {
 
 const UserMessage = ({message}) => {
     return (
-        <div className="bg-white px-3 py-1">
+        <div className="px-3 py-1 bg-white">
             <div className="w-2/3 py-4 ml-auto text-right">
                 <p>{message}</p>
             </div>
@@ -201,20 +222,20 @@ const UserMessage = ({message}) => {
 
 const GptMessage = ({message, gpt}) => {
     return (
-        <div className='bg-[#F7F7F8] p-2'>
-            <div className="flex items-center justify-between">
-                <span className="flex space-x-2 items-center">
+        <div>
+            <div className="flex p-2 text-[0.6rem] items-center justify-between">
+                <span className="flex items-center space-x-2">
                     <img src='/img/gpt.png' alt="gpt-image" />
                     <span>GPT {gpt}</span>
                 </span>
-                <span className="flex items-center space-x-2">
-                    <ClipboardIcon className="w-4 h-4"/>
+                <span className="flex items-center space-x-2 cursor-pointer">
+                    <ClipboardIcon className="w-3 h-3"/>
                     <span>copy</span>
                 </span>
             </div>
-            <div className=" px-10 py-3">
-            <p>{message}</p>
-        </div>
+            <div className="bg-[#F7F7F8] px-8 py-4">
+                <p>{message}</p>
+             </div>
         </div>
     )
 }

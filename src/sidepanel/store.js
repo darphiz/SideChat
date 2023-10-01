@@ -25,3 +25,8 @@ export const useGpt = create((set) => ({
     gpt: '3.5',
     setGpt: (gpt) => set(() => ({ gpt: gpt })),
 }))
+
+export const useNavBar = create((set) => ({
+    showNavBar: false,
+    setShowNavBar: (show) => set(() => ({ showNavBar: show })),
+}))
