@@ -1,9 +1,10 @@
 import React from 'react'
 import { ArrowRightIcon } from './Icons'
 import {ClipboardIcon} from '@heroicons/react/24/outline'
-import { useGpt, useCoin, useChat, useCurrentChat } from '../sidepanel/store'
+import { useGpt, useCoin, useChat, useCurrentChat, useUserSettings } from '../sidepanel/store'
 import { endpoint } from '../utils'
 import toast, { Toaster } from 'react-hot-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 export const ChatPage = () => {
     const gpt_version = useGpt((state) => state.gpt)
@@ -25,6 +26,8 @@ export const ChatPage = () => {
     const chatId = useCurrentChat((state) => state.chatId)
     const setChatId = useCurrentChat((state) => state.setChatId)
     const [prompt, setPrompt] = React.useState('')
+    const settings = useUserSettings((state) => state.settings)
+    const useClientAPIkey = settings?.gptAccess === 'api_key'
 
     // initialization
     React.useEffect(() => {
@@ -33,7 +36,12 @@ export const ChatPage = () => {
         }
         setChats(initialchat)
         // fetch coins
-        const guest_id = localStorage.getItem('guest_cid');
+        // TODO: Move guest_cid to service worker on install
+        let guest_id = localStorage.getItem('guest_cid');
+        if (!guest_id){
+            guest_id = uuidv4()
+            localStorage.setItem('guest_cid', guest_id);
+        }
         const fetchCoins = async () => {
             try{
                 const res = await fetch(endpoint(`/api/guest/coins/${guest_id}/`))
@@ -51,6 +59,10 @@ export const ChatPage = () => {
     }, [setChats])
 
     const promptGpt = async (custom_prompt=null) => {
+
+        if (parseInt(coin) <= 0 && !useClientAPIkey){
+            return toast.error("You are out of coin!")
+        }
         const newChat = {
             "chat_type": "user",
             "message": custom_prompt ?? prompt,
@@ -63,13 +75,10 @@ export const ChatPage = () => {
         ]
          
         
-        
         //fetch guest_id from local storage
         const guest_id = localStorage.getItem('guest_cid');
-
-
         // make server calls
-
+        const api_key = useClientAPIkey ? settings?.apiKey : null
         const route = chatId ? `/api/guest/chat/${chatId}/` : '/api/guest/chat/'
         try{
             setMakingRequest(true)
@@ -80,10 +89,14 @@ export const ChatPage = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({guest_id, chats:toSendChat}),
+                    body: JSON.stringify({
+                        guest_id, 
+                        chats:toSendChat,
+                        api_key
+                    })
                 }
             )
-            if (res.statusText !== 'OK') {
+            if (!res.ok) {
                 throw new Error('Network response was not ok')
             }
             const data = await res.json()
@@ -114,24 +127,24 @@ export const ChatPage = () => {
         {
             chats?.length <= 1 &&
             <div className="p-2">
-            <div className='flex items-center p-3 space-x-3 border rounded-xl'>
+            <div className='flex items-center justify-between p-3 space-x-3 border rounded-xl dark:text-gray-200'>
                 <div>
                     <Toaster />
                     <p className='font-bold'>🤓 Explain a complex sentence</p>
                     <p className='opacity-30 text-[.8rem]'>Tell me something about the Big Bang so that I can explain it to my 5-year-old child</p>
                 </div>
                 <button
-                    onClick={promptDefault}
+                    onClick={promptDefault}   
                 >
                     <ArrowRightIcon 
-                        className="w-8 h-8 cursor-pointer"
+                        className="w-5 h-5 cursor-pointer"
                     />    
                 </button>
                 
             </div>
         </div>}
         
-        <div className='h-full bg-white'>
+        <div className='h-full bg-white dark:bg-gray-700'>
             {
                 chats?.map((chat, index) => {
                     if (chat.chat_type === 'user') {
@@ -144,12 +157,12 @@ export const ChatPage = () => {
         </div>
         <div className="p-3">
             <div className="flex items-center justify-between my-3">
-                <button className="flex items-center p-2 space-x-3 border rounded-full">
+                <button className="flex items-center p-2 space-x-3 dark:text-gray-200 border rounded-full">
                     <img src="/img/coin.png" alt="coin image" className='w-4 h-4' />
                     <span className="text-sm">{coin}</span>
                 </button>
                 
-                <span className="flex items-center p-2 space-x-3 text-sm border rounded-full cursor-pointer">
+                <span className="flex items-center p-2 space-x-3 text-sm dark:text-gray-200 border rounded-full cursor-pointer">
                     <img src="/img/gpt-outline.png" alt="gpt image" className='w-5 h-5' />
                     <select 
                         onChange={(e) => setGpt(e.target.value)}
@@ -165,7 +178,7 @@ export const ChatPage = () => {
                 makingRequest ? (
                     <div className='my-8'>
                         <div className="flex items-center justify-center ">
-                            <div className="w-8 h-8 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+                            <div className="w-8 h-8 border-b-2 border-gray-900 dark:border-gray-200 rounded-full animate-spin"></div>
                         </div>
                     </div>
                 ) :
@@ -175,7 +188,7 @@ export const ChatPage = () => {
                     name="ask" 
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="w-full p-2 outline-none resize-none"
+                    className="w-full p-2 outline-none resize-none dark:bg-gray-700 dark:text-gray-200"
                     id="ask"  
                     rows="4" 
                     placeholder="Type prompt here..."
@@ -209,11 +222,10 @@ export const ChatPage = () => {
 
 const UserMessage = ({message}) => {
     return (
-        <div className="px-3 py-1 bg-white">
+        <div className="px-3 py-1 bg-white dark:bg-gray-700 dark:text-gray-200">
             <div className="w-2/3 py-4 ml-auto text-right">
                 <p>{message}</p>
             </div>
-         
         </div>
 
     )
@@ -223,7 +235,7 @@ const UserMessage = ({message}) => {
 const GptMessage = ({message, gpt}) => {
     return (
         <div>
-            <div className="flex p-2 text-[0.6rem] items-center justify-between">
+            <div className="flex p-2 text-[0.6rem] dark:text-gray-200 items-center justify-between">
                 <span className="flex items-center space-x-2">
                     <img src='/img/gpt.png' alt="gpt-image" />
                     <span>GPT {gpt}</span>
@@ -233,7 +245,7 @@ const GptMessage = ({message, gpt}) => {
                     <span>copy</span>
                 </span>
             </div>
-            <div className="bg-[#F7F7F8] px-8 py-4">
+            <div className="bg-[#F7F7F8] dark:bg-gray-500 dark:text-gray-200 px-8 py-4">
                 <p>{message}</p>
              </div>
         </div>

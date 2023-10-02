@@ -17,5 +17,12 @@
   "background": {
     "service_worker": "service-worker.js"
   },
-  "permissions": ["sidePanel", "contextMenus"]
+  "host_permissions": [
+    "https://sidechatbackend-5kbrs3yqmq-uc.a.run.app/"
+  ],
+  "permissions": [
+    "sidePanel", 
+    "contextMenus", 
+    "storage"
+    ]
 }

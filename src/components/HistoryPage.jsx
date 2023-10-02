@@ -1,10 +1,18 @@
 import React from 'react'
 import { ArrowRightIcon } from './Icons'
 import { endpoint } from '../utils'
+import { useCoin, useChat, useCurrentChat, usePage } from '../sidepanel/store'
+import toast, { Toaster } from 'react-hot-toast';
+
 export const HistoryPage = () => {
 
     const [histories, setHistories] = React.useState([])
-
+    const setChats = useChat((state) => state.setChats)
+    const setChatId = useCurrentChat((state) => state.setChatId)
+    const setCoin = useCoin((state) => state.setCoin)
+    const setCurrentPage = usePage((state) => state.setCurrentPage)
+    
+    
     React.useEffect(() => {
         // fetch histories
         const guest_id = localStorage.getItem('guest_cid');
@@ -27,23 +35,50 @@ export const HistoryPage = () => {
 
     }, [])
 
+
+    const fetchHistoryDetails = async(chat_id) =>{
+        try{
+            
+            const url = endpoint(`/api/guest/chat/${chat_id}/history/`)
+            const res =  await fetch(url)
+            if (!res.ok){
+                toast.error("Unable to fetch history")
+            }
+
+            const data = await res.json()
+            setChats(data.chats)
+            setCoin(data.coins)
+            setChatId(data.chat_id)
+            setCurrentPage('chat')
+        }catch{
+            toast.error('Something went wrong...')
+        }
+    }
+
+    
   return (
     <div>
-        <h1 className='text-center font-semibold my-6'>Chat Histories</h1>
+        <Toaster />
+        <h1 className='my-6 font-semibold text-center'>Chat Histories</h1>
         {
             histories?.length === 0 ? (
-                <div className='bg-white p-4  flex items-center justify-center'>
+                <div className='flex items-center justify-center p-4 bg-white  dark:bg-gray-500'>
                     <p className="opacity-40">Feel free to start chatting...</p>
                 </div>
             ) :
-            <div className='space-y-2 p-2'>
+            <div className='p-2 space-y-2'>
             {
                 histories?.map((history) => (
                     <div 
                         key={history.id} 
-                        className='bg-white p-4 rounded-xl border flex items-center justify-between'>
+                        className='flex items-center justify-between w-full p-4 bg-white border rounded-xl'>
                         <p className="opacity-70">{history.query}</p>
-                        <ArrowRightIcon className="cursor-pointer w-4 h-4"/>
+                        
+                        <button
+                            onClick={() => fetchHistoryDetails(history.id)}
+                        >
+                            <ArrowRightIcon className="w-4 h-4 cursor-pointer"/>                            
+                        </button>
                     </div>
                 ))
             }

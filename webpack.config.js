@@ -17,6 +17,7 @@ module.exports = {
   entry: {
     sidepanel: path.resolve("src/sidepanel/index.jsx"),
     "service-worker": path.resolve("src/serviceworker/service-worker.js"),
+    settings: path.resolve("src/settings/index.jsx")
   },
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -47,7 +48,9 @@ module.exports = {
       patterns: [{ from: "public" }],
     }),
 
-    ...getHtmlPlugins(["sidepanel"]),
+    ...getHtmlPlugins(
+        ["sidepanel", "settings"]
+        ),
   ],
   resolve: {
     extensions: [".jsx", ".js", ".css", ".otf"],

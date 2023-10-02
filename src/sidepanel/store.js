@@ -30,3 +30,14 @@ export const useNavBar = create((set) => ({
     showNavBar: false,
     setShowNavBar: (show) => set(() => ({ showNavBar: show })),
 }))
+
+export const useUserSettings = create((set) => ({
+     settings : {
+        language: 'en',
+        gptAccess: 'default',
+        apiKey: '',
+        theme: 'light',
+        sidebarLocation: 'right'
+    },
+    setSettings: (settings) => set(() => ({ settings: settings })),
+}))
