@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Side Chat",
-  "description": "Your number one AI assistant",
+  "name": "ChatGPT for Google Chrome Sidebar",
+  "description": "ChatGPT for Google Chrome Sidebar Extension for ChatGPT prompts",
   "version": "1.0",
   "action": {
-    "default_title": "Launch Side Chat AI"
+    "default_title": "Launch ChatGPT for Google Chrome Sidebar"
   },
   "icons": {
     "128": "img/icons_128.png",
